@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>사무용품 상시 신청</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">✎</span>
+      <div>
+        <h1>사무용품 상시 신청</h1>
+        <p class="sub">현재 분기 <strong id="hdr-quarter">-</strong> · 1인 한도 <strong id="hdr-limit">-</strong></p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <a href="#apply" class="tab" data-route="apply" role="tab">신청하기</a>
+      <a href="#admin" class="tab" data-route="admin" role="tab">관리자</a>
+    </nav>
+  </header>
+
+  <div id="sample-banner" class="banner" hidden>
+    지금 보이는 품목은 <strong>샘플</strong>입니다. 관리자 &gt; 설정에서 실제 오피스디포 품목 목록으로 교체하세요.
+  </div>
+
+  <main>
+    <!-- ===================== 화면 A: 신청하기 + 내 신청 ===================== -->
+    <section id="view-apply" class="view">
+      <div class="grid-2">
+        <!-- 품목 찾기 -->
+        <div class="card">
+          <div class="card-head">
+            <h2>1. 품목 고르기</h2>
+            <div class="seg" role="tablist">
+              <button type="button" class="seg-btn active" data-mode="catalog">목록에서 찾기</button>
+              <button type="button" class="seg-btn" data-mode="other">기타 신청</button>
+            </div>
+          </div>
+
+          <div id="pane-catalog">
+            <div class="search-row">
+              <input id="q" type="search" placeholder="상품명 또는 상품코드로 검색 (예: 볼펜)" autocomplete="off">
+            </div>
+            <div id="cat-chips" class="chips"></div>
+            <p class="muted small" id="result-count"></p>
+            <div class="table-wrap catalog-wrap">
+              <table class="tbl" id="catalog-table">
+                <thead><tr><th>상품코드</th><th>상품명</th><th>카테고리</th><th class="num">단가</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="pane-other" hidden>
+            <p class="muted">목록에 없는 상품은 오피스디포 쇼핑몰에서 찾은 뒤 아래에 적어 주세요. 관리자가 확인한 뒤 승인하면 주문서에 들어갑니다.</p>
+            <div class="form-grid">
+              <label class="span-2">쇼핑몰 상품 링크
+                <input id="o-link" type="url" placeholder="https://www.officedepot.co.kr/...">
+              </label>
+              <label>상품코드 <span class="muted">(알면)</span>
+                <input id="o-code" type="text">
+              </label>
+              <label>카테고리
+                <select id="o-cat"></select>
+              </label>
+              <label class="span-2">상품명 <span class="req">*</span>
+                <input id="o-name" type="text" placeholder="쇼핑몰에 표시된 이름 그대로">
+              </label>
+              <label>단가(원) <span class="muted">(알면)</span>
+                <input id="o-price" type="number" min="0" step="10">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 신청서 -->
+        <div class="card">
+          <h2>2. 신청서</h2>
+          <div id="selected-box" class="selected empty">왼쪽 목록에서 품목을 선택하세요.</div>
+          <form id="apply-form" class="form-grid" autocomplete="off">
+            <label>수량 <span class="req">*</span>
+              <input id="f-qty" type="number" min="1" step="1" value="1" required>
+            </label>
+            <label>예상 금액
+              <output id="f-amount" class="amount">-</output>
+            </label>
+            <label>부서명 <span class="req">*</span>
+              <select id="f-dept" required></select>
+            </label>
+            <label>직책명 <span class="req">*</span>
+              <input id="f-title" type="text" placeholder="예: 대리" required>
+            </label>
+            <label>이름 <span class="req">*</span>
+              <input id="f-name" type="text" placeholder="예: 김민수" required>
+            </label>
+            <label>비밀번호 4자리 <span class="req">*</span>
+              <input id="f-pin" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="수정·취소할 때 사용" required>
+            </label>
+            <label class="span-2">메모 <span class="muted">(선택)</span>
+              <input id="f-memo" type="text" placeholder="예: 검정색으로">
+            </label>
+            <div class="span-2 actions">
+              <button type="submit" class="btn primary" id="submit-btn">신청하기</button>
+            </div>
+          </form>
+          <div id="apply-msg" class="msg" hidden></div>
+        </div>
+      </div>
+
+      <!-- 내 신청 내역 -->
+      <div class="card">
+        <div class="card-head">
+          <h2>3. 내 신청 내역</h2>
+          <form id="my-form" class="inline-form" autocomplete="off">
+            <input id="my-name" type="text" placeholder="이름">
+            <input id="my-pin" type="password" inputmode="numeric" maxlength="4" placeholder="비밀번호 4자리">
+            <button type="submit" class="btn">조회</button>
+          </form>
+        </div>
+        <p class="muted small">신청 후 3일(72시간) 이내이고 분기 마감 전인 건만 수량 수정·취소할 수 있어요.</p>
+        <div id="my-summary" class="muted small"></div>
+        <div class="table-wrap">
+          <table class="tbl" id="my-table">
+            <thead><tr><th>신청일시</th><th>분기</th><th>상품</th><th class="num">단가</th><th class="num">수량</th><th class="num">금액</th><th>상태</th><th>수정·취소</th></tr></thead>
+            <tbody><tr><td colspan="8" class="empty-row">이름과 비밀번호로 조회하세요.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 화면 B: 관리자 ===================== -->
+    <section id="view-admin" class="view" hidden>
+      <div id="admin-lock" class="card narrow">
+        <h2 id="lock-title">관리자 로그인</h2>
+        <p class="muted" id="lock-desc">관리자 비밀번호를 입력하세요.</p>
+        <form id="lock-form" class="stack">
+          <input id="lock-pw" type="password" placeholder="관리자 비밀번호" required>
+          <input id="lock-pw2" type="password" placeholder="비밀번호 확인" hidden>
+          <button class="btn primary" type="submit">들어가기</button>
+        </form>
+        <div id="lock-msg" class="msg" hidden></div>
+      </div>
+
+      <div id="admin-main" hidden>
+        <div class="admin-bar card">
+          <div class="seg" role="tablist">
+            <button type="button" class="seg-btn active" data-admin="status">신청 현황</button>
+            <button type="button" class="seg-btn" data-admin="other">기타 신청 <span id="pending-badge" class="badge" hidden>0</span></button>
+            <button type="button" class="seg-btn" data-admin="settings">설정·품목</button>
+          </div>
+          <button type="button" class="btn ghost" id="logout-btn">잠그기</button>
+        </div>
+
+        <!-- 신청 현황 -->
+        <div id="admin-status">
+          <div class="card">
+            <div class="card-head">
+              <div class="row gap">
+                <label class="inline">분기
+                  <select id="a-quarter"></select>
+                </label>
+                <span id="a-quarter-state" class="pill"></span>
+              </div>
+              <div class="row gap">
+                <button type="button" class="btn" id="export-btn">주문서 엑셀 다운로드</button>
+                <button type="button" class="btn danger" id="close-btn">분기 마감</button>
+              </div>
+            </div>
+            <div class="stats" id="a-stats"></div>
+          </div>
+
+          <div class="card" id="over-card" hidden>
+            <h3>한도 초과 <span class="muted small" id="over-limit-label"></span></h3>
+            <div class="table-wrap">
+              <table class="tbl" id="over-table">
+                <thead><tr><th>부서명</th><th>직책명</th><th>이름</th><th class="num">신청 합계</th><th class="num">초과 금액</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>카테고리별 합산 <span class="muted small">상품을 누르면 신청자가 펼쳐집니다</span></h3>
+            <div id="a-groups"></div>
+          </div>
+        </div>
+
+        <!-- 기타 신청 -->
+        <div id="admin-other" hidden>
+          <div class="card">
+            <h3>확인 대기 중인 기타 신청</h3>
+            <p class="muted small">쇼핑몰에서 상품을 확인하고 코드·상품명·카테고리·단가를 바로잡은 뒤 승인하세요. 승인한 건만 주문서에 들어갑니다.</p>
+            <div id="o-list"></div>
+          </div>
+          <div class="card">
+            <h3>처리된 기타 신청</h3>
+            <div class="table-wrap">
+              <table class="tbl" id="o-done">
+                <thead><tr><th>분기</th><th>신청자</th><th>상품</th><th class="num">수량</th><th>상태</th><th>반려 사유</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 설정·품목 -->
+        <div id="admin-settings" hidden>
+          <div class="grid-2">
+            <div class="card">
+              <h3>기본 설정</h3>
+              <form id="set-form" class="form-grid">
+                <label>현재 분기
+                  <input id="s-quarter" type="text" pattern="\d{4}-Q[1-4]" placeholder="2026-Q4" required>
+                </label>
+                <label>1인 분기 한도(원)
+                  <input id="s-limit" type="number" min="0" step="1000" required>
+                </label>
+                <label class="span-2">주문서 작성자
+                  <input id="s-writer" type="text" placeholder="예: 기획팀 홍길동">
+                </label>
+                <label class="span-2">부서 목록 <span class="muted">(한 줄에 하나)</span>
+                  <textarea id="s-depts" rows="6"></textarea>
+                </label>
+                <div class="span-2 actions"><button class="btn primary" type="submit">설정 저장</button></div>
+              </form>
+              <div id="set-msg" class="msg" hidden></div>
+
+              <h3 class="mt">관리자 비밀번호 변경</h3>
+              <form id="pw-form" class="inline-form">
+                <input id="pw-new" type="password" placeholder="새 비밀번호" required>
+                <button class="btn" type="submit">변경</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h3>품목 목록 <span class="muted small" id="cat-count"></span></h3>
+              <p class="muted small">엑셀에서 <strong>상품코드 · 상품명 · 카테고리 · 단가 · 규격/단위</strong> 순서의 5개 열을 복사해 붙여 넣거나, 같은 순서의 CSV 파일을 올리세요. 첫 줄이 제목이면 자동으로 건너뜁니다. 저장하면 기존 목록을 <strong>교체</strong>합니다(이미 들어온 신청은 신청 시점 값 그대로 유지).</p>
+              <textarea id="cat-paste" rows="9" placeholder="상품코드&#9;상품명&#9;카테고리&#9;단가&#9;규격/단위"></textarea>
+              <div class="row gap wrap mt-s">
+                <button type="button" class="btn primary" id="cat-save">붙여 넣은 목록으로 교체</button>
+                <label class="btn file-btn">CSV 파일 올리기<input type="file" id="cat-file" accept=".csv,.tsv,.txt" hidden></label>
+                <button type="button" class="btn ghost" id="cat-template">CSV 양식 받기</button>
+                <button type="button" class="btn ghost" id="cat-export">현재 목록 CSV로 받기</button>
+              </div>
+              <div id="cat-msg" class="msg" hidden></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>데이터 백업·복원</h3>
+            <p class="muted small">이 앱은 데이터를 <strong>지금 쓰는 브라우저 안(localStorage)</strong>에만 저장합니다. 브라우저 데이터를 지우면 사라지니 분기마다 백업 파일을 받아 두세요.</p>
+            <div class="row gap wrap">
+              <button type="button" class="btn" id="backup-btn">백업 파일 받기(.json)</button>
+              <label class="btn file-btn">백업 파일로 복원<input type="file" id="restore-file" accept=".json" hidden></label>
+              <button type="button" class="btn danger ghost" id="reset-btn">전체 초기화(샘플로)</button>
+            </div>
+            <div id="backup-msg" class="msg" hidden></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot muted small">데이터는 이 브라우저에만 저장됩니다 · 데스크톱 크롬 기준</footer>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
